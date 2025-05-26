@@ -1,0 +1,16 @@
+{
+  "name": "playwright-template-structured",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --config=src/config/playwright-ui.config.ts",
+    "test:api": "playwright test --config=src/config/playwright-api.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "openapi-typescript": "^7.8.0",
+    "openapi-types": "^12.1.3",
+    "dotenv": "^16.0.3",
+    "typescript": "^5.0.0"
+  }
+}
