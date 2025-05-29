@@ -38,7 +38,7 @@ Contains the foundational logic and shared functionalities.
 
 ### 📌 Configuration (`config/`)
 
-Contains configuration files (environments, build scripts).
+Contains configuration files.
 
 ---
 

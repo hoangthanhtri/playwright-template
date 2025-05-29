@@ -2,15 +2,15 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 # Get staged .spec.ts files only
-FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.spec\.ts$')
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(spec|test)\.ts$|setup\.ts$')
 
 if [ -n "$FILES" ]; then
-  # Search for `.only` in the staged spec files
+  # Search for `.only` in the matched files
   MATCHED=$(echo "$FILES" | xargs grep -n '\.only' || true)
 
   if [ -n "$MATCHED" ]; then
     echo "$MATCHED"
-    echo "❌ Commit blocked: Found '.only' in test files (.spec.ts). Please remove it."
+    echo "❌ Commit blocked: Found '.only' in test files (.spec.ts, .test.ts, setup.ts). Please remove it."
     exit 1
   fi
 fi
