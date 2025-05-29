@@ -12,5 +12,6 @@ export const env = z
     PLAYWRIGHT_WORKERS: z.coerce.number().default(1),
     SHARD_INDEX: z.coerce.number().default(1),
     DEFAULT_PASSWORD: z.string(),
+    ADMIN_TOKEN: z.string().optional(),
   })
   .parse(process.env);
