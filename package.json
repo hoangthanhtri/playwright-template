@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "generate:index": "ts-node ./src/scripts/generate-index.ts",
+    "generate:openapi": "pnpm exec openapi-typescript https://petstore3.swagger.io/api/v3/openapi.yaml -o ./src/core/api/types/pet-store-type.ts --immutable --root-types true --export-type",
     "prepare": "prettier --write './src/**/*.{ts,tsx,json}'",
     "test": "playwright test",
     "test:ui": "playwright test --config=src/config/playwright-ui.config.ts",
