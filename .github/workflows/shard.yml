@@ -55,10 +55,18 @@ jobs:
     env:
       BASE_URL: ${{ inputs.base-url || vars.BASE_URL }}
       SHARD_INDEX: ${{ inputs.shardIndex }}
+      SHARD_TOTAL: ${{ vars.SHARD_TOTAL }}
       PLAYWRIGHT_TIMEOUT: ${{ vars.PLAYWRIGHT_TIMEOUT }}
       PLAYWRIGHT_EXPECT_TIMEOUT: ${{ vars.PLAYWRIGHT_EXPECT_TIMEOUT }}
       DEFAULT_PASSWORD: ${{ secrets.DEFAULT_PASSWORD }}
       ENV: ${{ vars.ENV }}
+      ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+      ADMIN_USERNAME: ${{ vars.ADMIN_USERNAME }}
+      RP_API_KEY: ${{ secrets.RP_API_KEY }}
+      RP_DOMAIN: ${{ vars.RP_DOMAIN }}
+      RP_PROJECT_NAME: ${{ vars.RP_PROJECT_NAME }}
+      RP_LAUNCH_NAME: ${{ vars.RP_LAUNCH_NAME }}
+      RP_MERGE_TYPE: ${{ vars.RP_MERGE_TYPE }}
 
     steps:
       - uses: actions/checkout@v4

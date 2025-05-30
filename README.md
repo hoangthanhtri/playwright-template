@@ -64,19 +64,41 @@ Test cases grouped by type:
 
 ## 🚀 Getting Started
 
-### Install Dependencies
+### 1. Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-### Run Tests
+### 2. Load Environment Variables
 
-- **All tests:**
+using .envrc, create .env from it
+
+### 3. Start ReportPortal (Optional)
+
+Start services locally using Docker:
 
 ```bash
-pnpm test
+docker compose -f ./docker/docker-compose.yml up -d
 ```
+
+🔌 Default Access
+URL: `http://localhost:8080`
+Project: `default_personal`
+Default User: `default\1q2w3e`
+Administrator: `superadmin\erebus`
+
+Update these credentials in `docker/docker-compose.yml` if needed.
+
+### 4. Setup Accounts
+
+Generate initial users, sessions, and storage state before testing:
+
+```bash
+pnpm setup-account
+```
+
+### 5. Run Tests
 
 - **UI tests only:**
 
@@ -90,7 +112,19 @@ pnpm test:ui
 pnpm test:api
 ```
 
-### Generate Index Files
+- **Interactive Test UI:**
+
+```bash
+pnpm test:api
+```
+
+- **Repeat a test 30 times (stress test):**
+
+```bash
+pnpm test-30
+```
+
+- **Generate Index Files:**
 
 ```bash
 pnpm run generate:index
@@ -98,7 +132,7 @@ pnpm run generate:index
 
 This creates `index.ts` files for convenient imports.
 
-### Generate OpenAPI Types
+- **Generate OpenAPI Types:**
 
 ```bash
 pnpm run generate:openapi

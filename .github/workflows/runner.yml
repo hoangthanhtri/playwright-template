@@ -4,16 +4,10 @@ description: Run Playwright tests in parallel shards
 on:
   workflow_dispatch:
     inputs:
-      milestone:
-        description: 'Milestone ID'
-        required: false
-        type: number
       base-url:
         description: 'Base URL'
         required: false
         type: string
-  schedule:
-    - cron: '0 14 * * *' # 14am UTC
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
@@ -38,6 +32,13 @@ jobs:
       PLAYWRIGHT_EXPECT_TIMEOUT: ${{ vars.PLAYWRIGHT_EXPECT_TIMEOUT }}
       DEFAULT_PASSWORD: ${{ secrets.DEFAULT_PASSWORD }}
       ENV: ${{ vars.ENV }}
+      ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+      ADMIN_USERNAME: ${{ vars.ADMIN_USERNAME }}
+      RP_API_KEY: ${{ secrets.RP_API_KEY }}
+      RP_DOMAIN: ${{ vars.RP_DOMAIN }}
+      RP_PROJECT_NAME: ${{ vars.RP_PROJECT_NAME }}
+      RP_LAUNCH_NAME: ${{ vars.RP_LAUNCH_NAME }}
+      RP_MERGE_TYPE: ${{ vars.RP_MERGE_TYPE }}
 
     steps:
       - uses: actions/checkout@v4
@@ -54,7 +55,7 @@ jobs:
 
       - name: Run setup
         id: run-setup
-        run: pnpm run setup-dev-user
+        run: pnpm run setup-account
 
       - name: Upload report portal temporary UUID
         uses: actions/upload-artifact@v4.3.6
