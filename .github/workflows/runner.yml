@@ -1,0 +1,128 @@
+name: Run Automated Tests
+description: Run Playwright tests in parallel shards
+
+on:
+  workflow_dispatch:
+    inputs:
+      milestone:
+        description: 'Milestone ID'
+        required: false
+        type: number
+      base-url:
+        description: 'Base URL'
+        required: false
+        type: string
+  schedule:
+    - cron: '0 14 * * *' # 14am UTC
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-setup:
+    name: Setup User ${{ matrix.shardIndex }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      max-parallel: 4
+      matrix:
+        shardIndex: [1]
+    env:
+      BASE_URL: ${{ github.event.inputs.base-url || vars.BASE_URL }}
+      SHARD_INDEX: ${{ matrix.shardIndex }}
+      SHARD_TOTAL: ${{ vars.SHARD_TOTAL }}
+      PLAYWRIGHT_TIMEOUT: ${{ vars.PLAYWRIGHT_TIMEOUT }}
+      PLAYWRIGHT_EXPECT_TIMEOUT: ${{ vars.PLAYWRIGHT_EXPECT_TIMEOUT }}
+      DEFAULT_PASSWORD: ${{ secrets.DEFAULT_PASSWORD }}
+      ENV: ${{ vars.ENV }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Instal project dependencies
+        run: pnpm install
+
+      - name: Run setup
+        id: run-setup
+        run: pnpm run setup-dev-user
+
+      - name: Upload report portal temporary UUID
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: rp-launch-uuid-tmp-files
+          path: rp-launch-uuid-*.tmp
+          retention-days: 1
+
+      - name: Upload user data
+        if: ${{ !cancelled() && steps.run-setup.outcome == 'success' }}
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: user-data
+          path: playwright
+          retention-days: 1
+
+  smoke-tests:
+    name: Smoke Test - Shard ${{ matrix.shardIndex }}
+    needs: test-setup
+    uses: ./.github/workflows/shard.yml
+    secrets: inherit
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        shardIndex: [1, 2, 3, 4]
+    with:
+      shardIndex: ${{ matrix.shardIndex }}
+      type: smokeTest
+      browsers: ${{ github.event_name != 'pull_request' && 'webkit,firefox,chrome' || 'webkit' }}
+      event_name: ${{ github.event_name }}
+
+  test-complete:
+    name: Test complete
+    if: ${{ !cancelled() }}
+    needs: [smoke-tests]
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-tags: 2
+
+      - name: Download Report Portal UUID tmp files from GitHub Actions Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-rp-uuid-files
+          pattern: rp-launch-uuid-*.tmp
+          merge-multiple: true
+
+      - name: Read UUIDs from .tmp files and merge via ReportPortal API
+        run: |
+          UUIDS=""
+          for file in all-rp-uuid-files/rp-launch-uuid-*.tmp; do
+            UUID=$(cat "$file" | tr -d '\n')
+            UUIDS="$UUIDS\"$UUID\","
+          done
+
+          # Remove trailing comma and wrap in array
+          UUIDS="[${UUIDS%,}]"
+
+          echo "Collected UUIDs: $UUIDS"
+
+          curl -X POST ${{ vars.RP_DOMAIN }}/api/v1/${{ vars.RP_PROJECT_NAME }}/launch/merge \
+            -H "Content-Type: application/json" \
+            -H "Authorization: bearer ${{ secrets.RP_API_KEY }}" \
+            -d '{
+              "description": "Merged launch from GitHub Actions",
+              "launches": '"$UUIDS"',
+              "mergeType": "${{ vars.RP_MERGE_TYPE }}"
+            }'

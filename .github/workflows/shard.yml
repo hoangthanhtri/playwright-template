@@ -1,0 +1,111 @@
+name: Shard
+on:
+  workflow_call:
+    inputs:
+      shardIndex:
+        required: true
+        type: string
+        description: 'Index of the shard'
+      type:
+        required: true
+        type: string
+        description: 'Type of tests to run'
+      event_name:
+        required: true
+        type: string
+      browsers:
+        required: false
+        type: string
+        description: 'Browsers to run the tests on'
+      base-url:
+        required: false
+        type: string
+        description: 'Base URL'
+
+jobs:
+  define-matrix:
+    name: Define matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          if [[ "${{ inputs.browsers }}" == *","* ]]; then
+            # If 'inputs.browsers' contains a comma, format each item with quotes
+            IFS=',' read -ra ADDR <<< "${{ inputs.browsers }}"
+            formatted_browsers=$(printf "\"%s\"," "${ADDR[@]}")
+            formatted_browsers="[${formatted_browsers%,}]" # Remove the trailing comma
+            echo "matrix=$formatted_browsers" >> $GITHUB_OUTPUT
+          else
+            # If 'inputs.browsers' does not contain a comma, echo it directly
+            echo "matrix=[\"${{ inputs.browsers }}\"]" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+  test:
+    name: ${{ inputs.type }} - ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+    needs: define-matrix
+    strategy:
+      fail-fast: true
+      max-parallel: 1
+      matrix:
+        browser: ${{ fromJson(needs.define-matrix.outputs.matrix) }}
+    env:
+      BASE_URL: ${{ inputs.base-url || vars.BASE_URL }}
+      SHARD_INDEX: ${{ inputs.shardIndex }}
+      PLAYWRIGHT_TIMEOUT: ${{ vars.PLAYWRIGHT_TIMEOUT }}
+      PLAYWRIGHT_EXPECT_TIMEOUT: ${{ vars.PLAYWRIGHT_EXPECT_TIMEOUT }}
+      DEFAULT_PASSWORD: ${{ secrets.DEFAULT_PASSWORD }}
+      ENV: ${{ vars.ENV }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' &&  github.head_ref || (github.ref || 'main')}}
+
+      - name: Mark repository as safe directory
+        run: git config --global --add safe.directory '*'
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Instal project dependencies
+        run: pnpm install
+
+      - name: Download state storage file
+        uses: actions/download-artifact@v4
+        with:
+          pattern: user-data
+
+      - name: Move and rename state storage file
+        run: |
+          mkdir -p playwright
+          mv user-data/.auth playwright/.auth
+
+      - name: Run All Tests
+        if: ${{ inputs.event_name != 'pull_request' }}
+        run: |
+          pnpm exec playwright test --grep '(?=.*@${{ inputs.type }})(?=.*@shard${{inputs.shardIndex}})' --project=${{ matrix.browser }} --config=./src/config/playwright-ui.config.ts
+
+      - name: Run Changed Tests
+        if: ${{ inputs.event_name == 'pull_request' }}
+        run: |
+          git branch main origin/main
+          git diff main --name-only
+          pnpm exec playwright test --only-changed=main --grep '(?=.*@${{ inputs.type }})(?=.*@shard${{inputs.shardIndex}})' --project=${{ matrix.browser }} --config=./src/config/playwright-ui.config.ts --retries=1
+
+      - name: Upload report portal temporary UUID
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: rp-launch-uuid-tmp-files
+          path: rp-launch-uuid-*.tmp
+          retention-days: 1

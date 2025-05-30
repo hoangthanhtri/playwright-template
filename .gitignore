@@ -1,2 +1,6 @@
-/node_modules
+node_modules
 .env
+playwright-report
+test-results
+playwright/.auth
+*.tmp

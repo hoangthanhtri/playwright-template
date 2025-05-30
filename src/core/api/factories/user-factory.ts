@@ -1,6 +1,6 @@
 import { CreateUserRequestBody } from '../types/user-type';
 import { InputWrapper } from '../types/input-wrapper';
-import { generateUniqueNumber } from '../../shared/utils/random';
+import { generateUniqueNumber } from '../../shared/utils/random-util';
 import { env } from '../../../config/env';
 
 export const buildUser = async (overrides: Partial<InputWrapper<CreateUserRequestBody>> = {}): Promise<InputWrapper<CreateUserRequestBody>> => {

@@ -1,37 +1,24 @@
-import { defineConfig } from "@playwright/test";
+import { defineConfig } from '@playwright/test';
 
-import { env } from "./env";
-import baseConfig from "./playwright.config";
+import { env } from './env';
+import baseConfig from './playwright.config';
 
 export default defineConfig({
   ...baseConfig,
-  reporter: process.env.CI
-    ? [
-        ["line"],
-        [
-          "junit",
-          {
-            outputFile: `results/test${new Date().getTime()}.xml`,
-            embedAnnotationsAsProperties: true,
-          },
-        ],
-        [env.ENV === "prod" ? "html" : "blob"],
-      ]
-    : "html",
   use: {
     ...baseConfig.use,
     headless: true,
-    trace: "off",
-    video: "off",
+    trace: 'off',
+    video: 'off'
   },
   projects: [
     {
-      name: "chrome",
+      name: 'chrome',
       use: {
-        browserName: "chromium",
-        channel: "chrome",
-      },
-    },
+        browserName: 'chromium',
+        channel: 'chrome'
+      }
+    }
   ],
-  retries: env.CI ? 2 : 0,
+  retries: env.CI ? 2 : 0
 });

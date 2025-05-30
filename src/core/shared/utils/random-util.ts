@@ -1,5 +1,5 @@
-import { env } from "../../../config/env";
-import { wait } from "./timing";
+import { env } from '../../../config/env';
+import { wait } from './timing-ultil';
 
 export const generateUniqueNumber = async () => {
   await wait(12);

@@ -1,49 +1,44 @@
-import { defineConfig } from "@playwright/test";
+import { defineConfig } from '@playwright/test';
 
-import { env } from "./env";
-import baseConfig from "./playwright.config";
+import { env } from './env';
+import baseConfig from './playwright.config';
 
 export default defineConfig({
   ...baseConfig,
-  reporter: process.env.CI
-    ? [
-        ["line"],
-        [
-          "junit",
-          {
-            outputFile: `results/test${new Date().getTime()}.xml`,
-            embedAnnotationsAsProperties: true,
-          },
-        ],
-        [env.ENV === "prod" ? "html" : "blob"],
-      ]
-    : "html",
   use: {
     ...baseConfig.use,
-    headless: true,
-    trace: "off",
-    video: "off",
+    headless: false,
+    trace: 'off',
+    video: 'off'
   },
   projects: [
     {
-      name: "chrome",
-      use: {
-        browserName: "chromium",
-        channel: "chrome",
-      },
+      name: 'setup authentication',
+      testMatch: ['**/*.setup.ts'],
+      grep: /@getStorageState/
     },
     {
-      name: "webkit",
+      name: 'chrome',
       use: {
-        browserName: "webkit",
+        browserName: 'chromium',
+        channel: 'chrome'
       },
+      dependencies: ['setup authentication']
     },
     {
-      name: "firefox",
+      name: 'webkit',
       use: {
-        browserName: "firefox",
+        browserName: 'webkit'
       },
+      dependencies: ['setup authentication']
     },
+    {
+      name: 'firefox',
+      use: {
+        browserName: 'firefox'
+      },
+      dependencies: ['setup authentication']
+    }
   ],
-  retries: env.CI ? 2 : 0,
+  retries: env.CI ? 2 : 0
 });

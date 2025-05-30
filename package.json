@@ -2,12 +2,15 @@
   "name": "playwright-template-structured",
   "version": "1.0.0",
   "scripts": {
-    "generate:index": "ts-node ./src/scripts/generate-index.ts",
-    "generate:openapi": "pnpm exec openapi-typescript https://petstore3.swagger.io/api/v3/openapi.yaml -o ./src/core/api/types/pet-store-type.ts --immutable --root-types true --export-type",
     "prepare": "prettier --write './src/**/*.{ts,tsx,json}'",
-    "test": "playwright test",
-    "test:ui": "playwright test --config=src/config/playwright-ui.config.ts",
-    "test:api": "playwright test --config=src/config/playwright-api.config.ts"
+    "generate:index": "ts-node ./src/scripts/index-generator.ts",
+    "generate:openapi": "pnpm exec openapi-typescript https://petstore3.swagger.io/api/v3/openapi.yaml -o ./src/core/api/types/pet-store-type.ts --immutable --root-types true --export-type",
+    "setup-account": "pnpm exec playwright test --grep @setupAccount --config=./src/config/playwright.config.ts",
+    "test:ui": " pnpm exec playwright test --grep '@smokeTest' --project=chrome --config=./src/config/playwright-ui.config.ts",
+    "test:api": " pnpm exec playwright test --grep '@smokeTest' --project=chrome --config=./src/config/playwright-api.config.ts",
+    "test": "pnpm exec playwright test --config=./src/config/playwright.config.ts",
+    "test-ui": "pnpm exec playwright test --config=./src/config/playwright.config.ts --ui",
+    "test-30": "pnpm exec playwright test --config=./src/config/playwright.config.ts --repeat-each=30 -x"
   },
   "dependencies": {
     "@faker-js/faker": "^9.2.0",
@@ -21,7 +24,8 @@
     "openapi-types": "^12.1.3",
     "openapi-typescript": "^7.8.0",
     "prettier": "^3.2.5",
-    "zod": "^3.25.34"
+    "zod": "^3.25.34",
+    "@reportportal/agent-js-playwright": "^5.1.11"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

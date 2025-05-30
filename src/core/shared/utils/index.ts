@@ -1,2 +1,2 @@
-export * as random from './random';
-export * as timing from './timing';
+export * as randomUtil from './random-util';
+export * as timingUltil from './timing-ultil';

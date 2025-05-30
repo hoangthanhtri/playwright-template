@@ -1,1 +1,1 @@
-export { generateUniqueName } from './unique-generator';
+export * as employeeFactory from './employee-factory';
