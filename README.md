@@ -146,6 +146,31 @@ This generates types from OpenAPI schemas into `./src/core/api/types/pet-store-t
 
 ---
 
+## 🧪 CI/CD: Scalable Parallel Test Execution
+
+This project is equipped with a scalable and modular **GitHub Actions workflow** to run tests efficiently and reliably across environments.
+
+### 🔧 Features:
+
+- **Parallel test execution** using matrix strategy across shards and browsers.
+- **Shared setup job** (`test-setup`) to generate data/state reused by all test shards.
+- **Dynamic browser selection** (`webkit`, `firefox`, `chrome`) based on PR or manual trigger.
+- **Tag-based test targeting** (`@shard1`, `@smokeTest`, etc.).
+- **Cross-browser and distributed run support**.
+- **Integration with ReportPortal**, including:
+  - Unique launch UUID per shard.
+  - Automatic UUID collection and merged launch via API.
+
+### 📁 Workflow Files:
+
+- `runner.yml`: Main orchestrator. Dispatches setup and test shards.
+- `shard.yml`: Reusable called workflow. Executes tests per browser/shard.
+- `test-complete`: Merges ReportPortal launches using stored UUIDs.
+
+This setup enables fast feedback loops, distributed execution, and centralized reporting for large-scale automation.
+
+---
+
 ## 🧪 Pre-commit Hooks
 
 Using `husky` for:
