@@ -74,7 +74,7 @@ pnpm install
 
 using .envrc, create .env from it
 
-### 3. Start ReportPortal (Optional)
+### 3. Start ReportPortal
 
 Start services locally using Docker:
 
