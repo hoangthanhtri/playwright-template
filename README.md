@@ -96,7 +96,7 @@ Update these credentials in `docker/docker-compose.yml` if needed.
 
 ### 4. Setup Accounts
 
-Generate initial users, sessions, and storage state before testing:
+Generate initial users before testing:
 
 ```bash
 pnpm setup-account
