@@ -82,10 +82,14 @@ Start services locally using Docker:
 docker compose -f ./docker/docker-compose.yml up -d
 ```
 
-🔌 Default Access
+Default Access
+
 URL: `http://localhost:8080`
+
 Project: `default_personal`
+
 Default User: `default\1q2w3e`
+
 Administrator: `superadmin\erebus`
 
 Update these credentials in `docker/docker-compose.yml` if needed.
